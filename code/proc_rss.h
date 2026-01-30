@@ -13,20 +13,20 @@ static size_t read_proc_rss_size(struct pid* proc_pid_struct);
 static size_t read_proc_rss_size(struct pid* proc_pid_struct) {
 	struct task_struct *task;
 	struct mm_struct *mm;
+	size_t total_rss;
+	ssize_t offset;
 	task = pid_task(proc_pid_struct, PIDTYPE_PID);
 	if (!task) {
 		return 0;
 	}
 	mm = get_task_mm(task);
-	if (mm) {
-		//精确偏移
-		size_t total_rss;
-		ssize_t offset = g_init_arg_start_offset_success ? g_arg_start_offset : 0;
-		total_rss = x_read_mm_struct_rss(mm, offset);
-		mmput(mm);
-		return total_rss;
+	if(!mm) {
+		return 0;
 	}
-	return 0;
+	offset = g_init_arg_start_offset_success ? g_arg_start_offset : 0;
+	total_rss = x_read_mm_struct_rss(mm, offset);
+	mmput(mm);
+	return total_rss;
 
 }
 #endif /* PROC_RSS_H_ */
